@@ -11,6 +11,12 @@ venv/Scripts/activate  # for windows
 
 # Install requirements
 pip install -r requirements.txt
+
+# Create experiment folder
+mkdir sandbox/experiments
+
+# Run the notebook
+test-benchmarl.ipynb
 ```
 
 ## Resources
