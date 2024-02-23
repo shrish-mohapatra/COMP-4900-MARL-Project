@@ -17,6 +17,8 @@ mkdir sandbox/experiments
 
 # Run the notebook
 test-benchmarl.ipynb
+
+# If using csv logger use pt_file_experiment.py to create gif
 ```
 
 ## Resources
