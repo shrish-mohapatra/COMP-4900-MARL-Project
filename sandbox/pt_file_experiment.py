@@ -5,7 +5,7 @@ import shutil
 
 # run the sandbox_benchmarl.py with logger as csv. In the videos folder grab the .pt files and make sure they are in the same directory as this file
 
-VID_NAME = 'ssl2'
+VID_NAME = 'eval_video_4'
 
 folder = 'frames'
 os.makedirs(folder, exist_ok=True)

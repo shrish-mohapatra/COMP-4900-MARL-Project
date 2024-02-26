@@ -3,6 +3,7 @@
 #  All rights reserved.
 
 import torch
+import numpy as np
 
 from vmas.simulator.core import World, Agent, Landmark, Sphere
 from vmas.simulator.scenario import BaseScenario
@@ -12,13 +13,13 @@ class Scenario(BaseScenario):
     def make_world(self, batch_dim: int, device: torch.device, **kwargs):
         world = World(batch_dim=batch_dim, device=device, dim_c=3)
         # set any world properties first
-        num_agents = 2
-        num_landmarks = 4
+        num_agents = 3
+        num_landmarks = 1
 
         # Add agents
         for i in range(num_agents):
-            speaker = True if i == 0 else False
-            name = "speaker_0" if speaker else f"listener_{i}"
+            speaker = False if i == 0 else True
+            name = "listener_0" if not speaker else f"speaker_{i}"
             agent = Agent(
                 name=name,
                 collide=False,
@@ -52,19 +53,25 @@ class Scenario(BaseScenario):
                 agent.color = torch.tensor(
                     [0.25, 0.25, 0.25], device=self.world.device, dtype=torch.float32
                 )
+
             # random properties for landmarks
-            self.world.landmarks[0].color = torch.tensor(
-                [0.65, 0.15, 0.15], device=self.world.device, dtype=torch.float32
-            )
-            self.world.landmarks[1].color = torch.tensor(
-                [0.15, 0.65, 0.15], device=self.world.device, dtype=torch.float32
-            )
-            self.world.landmarks[2].color = torch.tensor(
-                [0.15, 0.15, 0.65], device=self.world.device, dtype=torch.float32
-            )
-            self.world.landmarks[3].color = torch.tensor(
-                [0.15, 0.15, 0.65], device=self.world.device, dtype=torch.float32
-            )
+            for i, landmark in enumerate(self.world.landmarks):
+                rgb = np.random.rand(3)
+                landmark.color = torch.tensor(
+                    [rgb[0], rgb[1], rgb[2]], device=self.world.device, dtype=torch.float32
+                )
+            # self.world.landmarks[0].color = torch.tensor(
+            #     [0.65, 0.15, 0.15], device=self.world.device, dtype=torch.float32
+            # )
+            # self.world.landmarks[1].color = torch.tensor(
+            #     [0.15, 0.65, 0.15], device=self.world.device, dtype=torch.float32
+            # )
+            # self.world.landmarks[2].color = torch.tensor(
+            #     [0.15, 0.15, 0.65], device=self.world.device, dtype=torch.float32
+            # )
+            # self.world.landmarks[3].color = torch.tensor(
+            #     [0.15, 0.15, 0.65], device=self.world.device, dtype=torch.float32
+            # )
             # special colors for goals
             self.world.agents[0].goal_a.color = self.world.agents[
                 0
@@ -139,4 +146,5 @@ class Scenario(BaseScenario):
             return goal_color.repeat(self.world.batch_dim, 1)
         # listener
         if agent.silent:
-            return torch.cat([agent.state.vel, *entity_pos, *comm], dim=-1)
+            # return torch.cat([agent.state.vel, *entity_pos, *comm], dim=-1)
+            return torch.cat([*comm], dim=-1)

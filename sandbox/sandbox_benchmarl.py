@@ -1,18 +1,21 @@
 from benchmarl.algorithms import MappoConfig
+from benchmarl.algorithms import Maddpg
 from benchmarl.environments import VmasTask
 from benchmarl.experiment import Experiment, ExperimentConfig
 from benchmarl.models.mlp import MlpConfig
-import wandb
+from ComplexVmasTask import ComplexVmasTask
 
 # Loads from "benchmarl/conf/experiment/base_experiment.yaml"
 experiment_config = ExperimentConfig.get_from_yaml()
 
 # Loads from "benchmarl/conf/task/vmas/balance.yaml"
-task = VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
+# task = VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
+task = ComplexVmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 print(task)
 
 # Loads from "benchmarl/conf/algorithm/mappo.yaml"
-algorithm_config = MappoConfig.get_from_yaml()
+# algorithm_config = MappoConfig.get_from_yaml()
+algorithm_config = Maddpg.get_from_yaml()
 
 # Loads from "benchmarl/conf/model/layers/mlp.yaml"
 model_config = MlpConfig.get_from_yaml()
@@ -26,7 +29,7 @@ experiment_config.render = True
 experiment_config.evaluation_interval = 6_000
 experiment_config.evaluation_episodes = 10
 
-experiment_config.max_n_iters = 2
+experiment_config.max_n_iters = 5
 experiment_config.loggers = ["csv"]
 experiment_config.create_json = True
 experiment_config.save_folder = "experiments"
