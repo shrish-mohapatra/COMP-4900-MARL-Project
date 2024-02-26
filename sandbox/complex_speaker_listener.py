@@ -18,8 +18,8 @@ class Scenario(BaseScenario):
 
         # Add agents
         for i in range(num_agents):
-            speaker = False if i == 0 else True
-            name = "listener_0" if not speaker else f"speaker_{i}"
+            speaker = False if i == num_agents-1 else True
+            name = f"listener_{i}" if not speaker else f"speaker_{i}"
             agent = Agent(
                 name=name,
                 collide=False,
@@ -39,20 +39,43 @@ class Scenario(BaseScenario):
 
     def reset_world_at(self, env_index: int = None):
         if env_index is None:
+            # # assign goals to agents
+            # for agent in self.world.agents:
+            #     agent.goal_a = None
+            #     agent.goal_b = None
+            # # want listener to go to the goal landmark
+            # self.world.agents[0].goal_a = self.world.agents[1]
+            # self.world.agents[0].goal_b = self.world.landmarks[
+            #     torch.randint(0, len(self.world.landmarks), (1,)).item()
+            # ]
+
             # assign goals to agents
             for agent in self.world.agents:
-                agent.goal_a = None
-                agent.goal_b = None
+                agent.goal_a = self.world.agents[len(self.world.agents)-1]
+                agent.goal_b = self.world.landmarks[
+                    torch.randint(0, len(self.world.landmarks), (1,)).item()
+                ]
             # want listener to go to the goal landmark
-            self.world.agents[0].goal_a = self.world.agents[1]
-            self.world.agents[0].goal_b = self.world.landmarks[
-                torch.randint(0, len(self.world.landmarks), (1,)).item()
-            ]
+            self.world.agents[len(self.world.agents)-1].goal_a = None
+            self.world.agents[len(self.world.agents)-1].goal_b = None
+
             # random properties for agents
+            blue_guy = False
             for i, agent in enumerate(self.world.agents):
-                agent.color = torch.tensor(
-                    [0.25, 0.25, 0.25], device=self.world.device, dtype=torch.float32
-                )
+                rgb = np.random.rand(3)
+                if agent.silent:
+                    agent.color = torch.tensor(
+                        [rgb[0]/4, 0.85, rgb[2]/4], device=self.world.device, dtype=torch.float32
+                    )
+                    if not blue_guy:
+                        agent.color = torch.tensor(
+                            [rgb[0]/4, rgb[1]/4, 0.85], device=self.world.device, dtype=torch.float32
+                        )
+                        blue_guy = True
+                else:
+                    agent.color = torch.tensor(
+                        [rgb[0]/4, rgb[1]/4, 0.85], device=self.world.device, dtype=torch.float32
+                    )
 
             # random properties for landmarks
             for i, landmark in enumerate(self.world.landmarks):
@@ -73,11 +96,16 @@ class Scenario(BaseScenario):
             #     [0.15, 0.15, 0.65], device=self.world.device, dtype=torch.float32
             # )
             # special colors for goals
-            self.world.agents[0].goal_a.color = self.world.agents[
-                0
-            ].goal_b.color + torch.tensor(
-                [0.45, 0.45, 0.45], device=self.world.device, dtype=torch.float32
-            )
+            # self.world.agents[0].goal_a.color = self.world.agents[
+            #     0
+            # ].goal_b.color + torch.tensor(
+            #     [0.45, 0.45, 0.45], device=self.world.device, dtype=torch.float32
+            # )
+            for agent in self.world.agents:
+                if not agent.silent:
+                    agent.goal_a.color = agent.goal_b.color + torch.tensor(
+                        [0.45, 0.45, 0.45], device=self.world.device, dtype=torch.float32
+                    )
 
         # set random initial states
         for agent in self.world.agents:
@@ -146,5 +174,5 @@ class Scenario(BaseScenario):
             return goal_color.repeat(self.world.batch_dim, 1)
         # listener
         if agent.silent:
-            # return torch.cat([agent.state.vel, *entity_pos, *comm], dim=-1)
-            return torch.cat([*comm], dim=-1)
+            return torch.cat([agent.state.vel, *entity_pos, *comm], dim=-1)
+            # return torch.cat([*comm], dim=-1)

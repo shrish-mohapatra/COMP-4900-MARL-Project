@@ -1,5 +1,4 @@
-from benchmarl.algorithms import MappoConfig
-from benchmarl.algorithms import Maddpg
+from benchmarl.algorithms import MappoConfig, MaddpgConfig
 from benchmarl.environments import VmasTask
 from benchmarl.experiment import Experiment, ExperimentConfig
 from benchmarl.models.mlp import MlpConfig
@@ -14,8 +13,8 @@ task = ComplexVmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 print(task)
 
 # Loads from "benchmarl/conf/algorithm/mappo.yaml"
-# algorithm_config = MappoConfig.get_from_yaml()
-algorithm_config = Maddpg.get_from_yaml()
+algorithm_config = MappoConfig.get_from_yaml()
+# algorithm_config = MaddpgConfig.get_from_yaml()
 
 # Loads from "benchmarl/conf/model/layers/mlp.yaml"
 model_config = MlpConfig.get_from_yaml()
