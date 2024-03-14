@@ -79,7 +79,8 @@ class Scenario(BaseScenario):
 
             # random properties for landmarks
             for i, landmark in enumerate(self.world.landmarks):
-                rgb = np.random.rand(3)
+                # rgb = np.random.rand(3)
+                rgb = np.array([1, 0, 0])
                 landmark.color = torch.tensor(
                     [rgb[0], rgb[1], rgb[2]], device=self.world.device, dtype=torch.float32
                 )
@@ -136,7 +137,7 @@ class Scenario(BaseScenario):
                 ),
                 batch_index=env_index,
             )
-
+        
     def reward(self, agent: Agent):
         # squared distance from listener to landmark
         is_first = agent == self.world.agents[0]
@@ -152,8 +153,17 @@ class Scenario(BaseScenario):
         return self.rew
 
     def observation(self, agent):
+        for agent in self.world.agents:
+            if (agent.movable):
+                print('listener')
+            else:
+                print('speaker')
+            print('u:', agent.action._u)
+            print('c:', agent.action._c)
+
         # goal color
         goal_color = torch.zeros(3, device=self.world.device, dtype=torch.float32)
+        # speaker
         if agent.goal_b is not None:
             goal_color = agent.goal_b.color
 
