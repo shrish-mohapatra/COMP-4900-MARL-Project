@@ -1,6 +1,36 @@
 # COMP 4900G Project
 > Multi agent reinforcement learning project
 
+
+## Development
+```
+/utils
+    scripts to help convert stuff
+    pt_to_gif.py
+    ...
+
+/src
+    files relevant to our experiment
+    complex_speaker_listener.py
+
+/results
+    contain execution results from experiments
+
+/experiments
+    shrish/
+        baseline.ipynb
+    josh/
+        baseline.py
+    jovin/
+
+gitignore
+readme
+requirements
+
+venv
+```
+
+
 ## Setup
 ```shell
 # Create venv
@@ -15,10 +45,8 @@ pip install -r requirements.txt
 # Create experiment folder
 mkdir sandbox/experiments
 
-# Run the notebook
-test-benchmarl.ipynb
-
-# If using csv logger use pt_file_experiment.py to create gif
+# Run your experiment
+python -m experiments.shrish.test
 ```
 
 ## Resources
