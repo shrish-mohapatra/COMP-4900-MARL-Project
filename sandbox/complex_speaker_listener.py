@@ -153,13 +153,13 @@ class Scenario(BaseScenario):
         return self.rew
 
     def observation(self, agent):
-        for agent in self.world.agents:
-            if (agent.movable):
-                print('listener')
-            else:
-                print('speaker')
-            print('u:', agent.action._u)
-            print('c:', agent.action._c)
+        # for agent in self.world.agents:
+        #     if (agent.movable):
+        #         print('listener')
+        #     else:
+        #         print('speaker')
+        #     print('u:', agent.action._u)
+        #     print('c:', agent.action._c)
 
         # goal color
         goal_color = torch.zeros(3, device=self.world.device, dtype=torch.float32)

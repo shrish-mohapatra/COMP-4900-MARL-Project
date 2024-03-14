@@ -4,6 +4,8 @@ from benchmarl.experiment import Experiment, ExperimentConfig
 from benchmarl.models.mlp import MlpConfig
 from ComplexVmasTask import ComplexVmasTask
 
+from utils.pt_export import convert_pt_to_gif
+
 # Loads from "benchmarl/conf/experiment/base_experiment.yaml"
 experiment_config = ExperimentConfig.get_from_yaml()
 
@@ -28,10 +30,10 @@ experiment_config.render = True
 experiment_config.evaluation_interval = 6_000
 experiment_config.evaluation_episodes = 10
 
-experiment_config.max_n_iters = 5
+experiment_config.max_n_iters = 1
 experiment_config.loggers = ["csv"]
 experiment_config.create_json = True
-experiment_config.save_folder = "experiments"
+experiment_config.save_folder = "experiments2"
 
 # Create the experiment
 experiment = Experiment(
@@ -43,4 +45,12 @@ experiment = Experiment(
     config=experiment_config,
 )
 
+# Log experiment folder path
+print(experiment.name)
+
+# Run experiment
 experiment.run()
+
+# Convert pt files to gifs
+video_file_path = f'{experiment_config.save_folder}/{experiment.name}/{experiment.name}/videos'
+convert_pt_to_gif(video_file_path)

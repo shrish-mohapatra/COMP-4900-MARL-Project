@@ -161,6 +161,7 @@ cython_debug/
 
 
 /sandbox/experiments
+/sandbox/experiments2
 /sandbox/wandb
 
 # videos
