@@ -30,7 +30,7 @@ experiment_config.render = True
 experiment_config.evaluation_interval = 6_000
 experiment_config.evaluation_episodes = 10
 
-experiment_config.max_n_iters = 1
+experiment_config.max_n_iters = 5
 experiment_config.loggers = ["csv"]
 experiment_config.create_json = True
 experiment_config.save_folder = "results"

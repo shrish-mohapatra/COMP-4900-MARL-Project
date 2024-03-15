@@ -1,0 +1,5 @@
+from utils.pt_export import convert_pt_to_gif
+
+
+folder_path = "results/maddpg_simple_speaker_listener_mlp__5ecc33cf_24_03_14-21_29_28/maddpg_simple_speaker_listener_mlp__5ecc33cf_24_03_14-21_29_28/videos"
+convert_pt_to_gif(folder_path)

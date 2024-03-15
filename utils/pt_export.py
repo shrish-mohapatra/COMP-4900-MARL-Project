@@ -9,7 +9,7 @@ def convert_pt_to_gif(folder_path: str):
     Convert .pt files within specified folder_path into gifs
     """
     # TODO: detect number of pt files to convert
-    num_videos = 1
+    num_videos = len(os.listdir(folder_path))
 
     for i in range(num_videos):
         VID_NAME = f'{folder_path}/eval_video_{i}'
