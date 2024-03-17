@@ -8,16 +8,15 @@ def convert_pt_to_gif(folder_path: str):
     """
     Convert .pt files within specified folder_path into gifs
     """
-    # TODO: detect number of pt files to convert
-    num_videos = len(os.listdir(folder_path))
+    video_names = os.listdir(folder_path)
 
-    for i in range(num_videos):
-        VID_NAME = f'{folder_path}/eval_video_{i}'
+    for video_name in video_names:
+        VID_NAME = f'{folder_path}/{video_name}'
 
         folder = 'frames'
         os.makedirs(folder, exist_ok=True)
 
-        tensor = torch.load(f'./{VID_NAME}.pt')
+        tensor = torch.load(f'./{VID_NAME}')
         frames = tensor.shape[1]
 
         for i in range(frames):

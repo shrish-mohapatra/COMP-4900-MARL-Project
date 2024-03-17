@@ -23,14 +23,15 @@ model_config = MlpConfig.get_from_yaml()
 critic_model_config = MlpConfig.get_from_yaml()
 
 # THIS IS VERY IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-experiment_config.on_policy_collected_frames_per_batch = 6000
+experiment_config.on_policy_collected_frames_per_batch = 1_000
+experiment_config.off_policy_collected_frames_per_batch = 1_000
 experiment_config.evaluation = True
 experiment_config.render = True
 # experiment_config.evaluation_interval = 12_000
-experiment_config.evaluation_interval = 6_000
+experiment_config.evaluation_interval = 50_000
 experiment_config.evaluation_episodes = 10
 
-experiment_config.max_n_iters = 5
+experiment_config.max_n_iters = 100
 experiment_config.loggers = ["csv"]
 experiment_config.create_json = True
 experiment_config.save_folder = "results"

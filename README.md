@@ -55,6 +55,24 @@ python -m experiments.shrish.test
 - [BenchMARL + VMAS colab example](https://colab.research.google.com/github/facebookresearch/BenchMARL/blob/main/notebooks/run.ipynb#scrollTo=4f32b88e)
 
 
+## Development
+
+### Changing number of generated videos
+With our current setup each .pt file used to create video is around 100mb. To reduce this we need to change the experiment_config settings as follows:
+```py
+# how many frames to collect a batch
+experiment_config.on_policy_collected_frames_per_batch = 1_000
+
+# how many frames to evaluate to create a video
+experiment_config.evaluation_interval = 50_000
+
+# how many iterations to run
+experiment_config.max_n_iters = 100
+
+# how many videos will be created?
+# 1.000 frames x 100 iterations / 50,000 eval interval = 2
+```
+
 ### Running with CUDA
 We want to use our GPU to run experiments faster. Since the library uses PyTorch follow these instructions.
 1. install [Anaconda](https://www.anaconda.com/download)
