@@ -5,6 +5,7 @@ from benchmarl.models.mlp import MlpConfig
 
 from src.BaselineVmasTask import BaselineVmasTask
 from utils.pt_export import convert_pt_to_gif
+import torch
 
 # Loads from "benchmarl/conf/experiment/base_experiment.yaml"
 experiment_config = ExperimentConfig.get_from_yaml()
@@ -28,13 +29,19 @@ experiment_config.off_policy_collected_frames_per_batch = 1_000
 experiment_config.evaluation = True
 experiment_config.render = True
 # experiment_config.evaluation_interval = 12_000
-experiment_config.evaluation_interval = 50_000
+experiment_config.evaluation_interval = 10_000
 experiment_config.evaluation_episodes = 10
 
-experiment_config.max_n_iters = 100
+experiment_config.max_n_iters = 5 # epoch
 experiment_config.loggers = ["csv"]
 experiment_config.create_json = True
 experiment_config.save_folder = "results"
+if torch.cuda.is_available():
+    print('running cuda')
+    experiment_config.sampling_device = 'cuda'
+    experiment_config.train_device = 'cuda'
+experiment_config.off_policy_train_batch_size = 256
+# experiment_config.on_policy_minibatch_size = 400
 
 # Create the experiment
 experiment = Experiment(

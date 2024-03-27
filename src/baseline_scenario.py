@@ -34,18 +34,40 @@ class Scenario(BaseScenario):
         )
         world.add_agent(agent)
 
+        ###########################################
+        name = f"civilian_1"
+        agent = Agent(
+            name=name,
+            collide=False,
+            movable=False,
+            silent=False,
+            shape=Sphere(radius=0.075),
+        )
+        world.add_agent(agent)
+        
+        name = f"policeHQ_2"
+        agent = Agent(
+            name=name,
+            collide=False,
+            movable=False,
+            silent=False,
+            shape=Sphere(radius=0.075),
+        )
+        world.add_agent(agent)
+        ###############################################
+
         # Add speaker agents
         num_speakers = 2
-        for i in range(num_speakers):
-            name = f"speaker_{i+1}"
-            agent = Agent(
-                name=name,
-                collide=False,
-                movable=False,
-                silent=False,
-                shape=Sphere(radius=0.075),
-            )
-            world.add_agent(agent)
+        # for i in range(num_speakers):
+        #     name = f"speaker_{i+1}"
+        #     agent = Agent(
+        #         name=name,
+        #         collide=False,
+        #         movable=False,
+        #         silent=False,
+        #         shape=Sphere(radius=0.075),
+        #     )
+        #     world.add_agent(agent)
 
         # Create map from agent name to agent
         self.agent_map = {}
@@ -115,26 +137,31 @@ class Scenario(BaseScenario):
                 if other_agent.state.c is not None
             ]
             obs = torch.cat([*comm], dim=-1)
+            # print('listener:', obs)
             return obs
 
-        elif agent.name == "speaker_1":
+        elif agent.name == "civilian_1":
             # return its distance from itself to the target
-            obs_pos = torch.sub(self.world.target.state.pos, agent.state.pos)
-            obs_pad = torch.zeros(
-                [self.world.batch_dim, 2], device=self.world.device, dtype=torch.float32)
-            obs = torch.cat([
-                obs_pos,
-                obs_pad
-            ], dim=1)
+            # obs_pos = torch.sub(self.world.target.state.pos, agent.state.pos)
+            # obs_pad = torch.zeros(
+            #     [self.world.batch_dim, 2], device=self.world.device, dtype=torch.float32)
+            # obs = torch.cat([
+            #     obs_pos,
+            #     obs_pad
+            # ], dim=1)
+
+            obs = torch.sub(self.world.target.state.pos, agent.state.pos)
+            # print('civilian_1:', obs)
             return obs
 
-        elif agent.name == "speaker_2":
+        elif agent.name == "policeHQ_2":
             # return its distance from itself to the listener, and speaker_0 to itself
             # [ x, y, x2, y2 ]
             obs = torch.cat([
                 self.agent_map["listener_0"].state.pos - agent.state.pos,
-                self.agent_map["speaker_1"].state.pos - agent.state.pos,
+                self.agent_map["civilian_1"].state.pos - agent.state.pos,
             ], dim=-1)
+            # print('policeHQ_2:', obs)
             return obs
 
         else:
