@@ -9,15 +9,17 @@ from typing import Callable, Dict, List, Optional
 from torchrl.data import CompositeSpec
 from torchrl.envs import EnvBase
 from torchrl.envs.libs.vmas import VmasEnv
+from torchrl.envs.transforms import TransformedEnv
 
 from benchmarl.environments.common import Task
 from benchmarl.utils import DEVICE_TYPING
 
 from src.baseline_scenario import Scenario
+from src.transforms.BlockListener import BlockListener
 # from src.baseline_scenario_wip import Scenario
 
 
-class BaselineVmasTask(Task):
+class Ext1VmasTask(Task):
 
     SIMPLE_SPEAKER_LISTENER = None
 
@@ -28,17 +30,24 @@ class BaselineVmasTask(Task):
         seed: Optional[int],
         device: DEVICE_TYPING,
     ) -> Callable[[], EnvBase]:
-        print("")
-        return lambda: VmasEnv(
-            scenario=Scenario(),
-            num_envs=num_envs,
-            continuous_actions=continuous_actions,
-            seed=seed,
-            device=device,
-            categorical_actions=True,
-            clamp_actions=True,
-            **self.config,
-        )
+        print("using extesnion 1")
+
+        def env_generator():
+            env = VmasEnv(
+                scenario=Scenario(),
+                num_envs=num_envs,
+                continuous_actions=continuous_actions,
+                seed=seed,
+                device=device,
+                categorical_actions=True,
+                clamp_actions=True,
+                **self.config,
+            )
+            transform = BlockListener(0.2)
+            transformed_env = TransformedEnv(env, transform)
+            return transformed_env
+        
+        return env_generator
 
     def supports_continuous_actions(self) -> bool:
         return True

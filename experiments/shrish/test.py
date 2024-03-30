@@ -4,6 +4,7 @@ from benchmarl.experiment import Experiment, ExperimentConfig
 from benchmarl.models.mlp import MlpConfig
 
 from src.BaselineVmasTask import BaselineVmasTask
+from src.Ext1VmasTask import Ext1VmasTask
 from utils.pt_export import convert_pt_to_gif
 import torch
 
@@ -12,7 +13,7 @@ experiment_config = ExperimentConfig.get_from_yaml()
 
 # Loads from "benchmarl/conf/task/vmas/balance.yaml"
 # task = VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
-task = BaselineVmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
+task = Ext1VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 print(task)
 
 # Loads from "benchmarl/conf/algorithm/mappo.yaml"
