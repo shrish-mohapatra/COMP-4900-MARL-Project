@@ -115,17 +115,25 @@ class Scenario(BaseScenario):
                 ),
                 batch_index=env_index,
             )
-        # self.rew = torch.zeros(....)
+        self.rew = torch.zeros(self.world.batch_dim, device=self.world.device)
 
     def reward(self, agent: Agent):
         # squared distance from listener to landmark
 
         # TODO: maybe change this to cummulative
-        self.rew = -torch.sqrt(
+        self.rew -= torch.sqrt(
             torch.sum(
                 torch.square(self.world.target.state.pos - self.agent_map["listener_0"].state.pos), dim=-1
             )
+        ) / 100
+
+        cur_distance = torch.linalg.vector_norm(
+            (self.agent_map["listener_0"].state.pos -
+             self.world.target.state.pos),
+            dim=1
         )
+        updates = cur_distance <= self.MIN_DISTANCE
+        self.rew[updates] += 20000
 
         return self.rew
 
@@ -136,8 +144,8 @@ class Scenario(BaseScenario):
             dim=1
         )
         result = cur_distance <= self.MIN_DISTANCE
-        if result.any():
-            print(f"cur_distance={cur_distance}")
+        # if result.any():
+        #     print(f"cur_distance={cur_distance}")
         return result
         # listener.pos - goal.pos < threshold -> done :D
         # [ True, False, False, ... n_envs]
