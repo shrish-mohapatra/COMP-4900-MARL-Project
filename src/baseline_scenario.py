@@ -21,6 +21,8 @@ class Scenario(BaseScenario):
         """
         world = World(batch_dim=batch_dim, device=device, dim_c=6)
 
+        self.MIN_DISTANCE = 0.01
+
         # Add agents ---
 
         # Add listener agent
@@ -44,7 +46,7 @@ class Scenario(BaseScenario):
             shape=Sphere(radius=0.075),
         )
         world.add_agent(agent)
-        
+
         name = f"policeHQ_2"
         agent = Agent(
             name=name,
@@ -113,6 +115,7 @@ class Scenario(BaseScenario):
                 ),
                 batch_index=env_index,
             )
+        # self.rew = torch.zeros(....)
 
     def reward(self, agent: Agent):
         # squared distance from listener to landmark
@@ -125,6 +128,19 @@ class Scenario(BaseScenario):
         )
 
         return self.rew
+
+    def done(self):
+        cur_distance = torch.linalg.vector_norm(
+            (self.agent_map["listener_0"].state.pos -
+             self.world.target.state.pos),
+            dim=1
+        )
+        result = cur_distance <= self.MIN_DISTANCE
+        if result.any():
+            print(f"cur_distance={cur_distance}")
+        return result
+        # listener.pos - goal.pos < threshold -> done :D
+        # [ True, False, False, ... n_envs]
 
     def observation(self, agent):
         """Compute observation tensor for specific agent"""
