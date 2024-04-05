@@ -4,7 +4,7 @@ from benchmarl.experiment import Experiment, ExperimentConfig
 from benchmarl.models.mlp import MlpConfig
 
 from src.BaselineVmasTask import BaselineVmasTask
-from src.Ext1VmasTask import Ext1VmasTask
+from src.Ext3VmasTask import Ext3VmasTask
 from utils.pt_export import convert_pt_to_gif
 import torch
 
@@ -12,8 +12,8 @@ import torch
 experiment_config = ExperimentConfig.get_from_yaml()
 
 # Loads from "benchmarl/conf/task/vmas/balance.yaml"
-task = BaselineVmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
-# task = Ext1VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
+# task = BaselineVmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
+task = Ext3VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 print(task)
 
 # Loads from "benchmarl/conf/algorithm/mappo.yaml"
@@ -30,10 +30,10 @@ experiment_config.off_policy_collected_frames_per_batch = 1_000
 experiment_config.evaluation = True
 experiment_config.render = True
 # experiment_config.evaluation_interval = 12_000
-experiment_config.evaluation_interval = 1_000
+experiment_config.evaluation_interval = 100_000
 experiment_config.evaluation_episodes = 10
 
-experiment_config.max_n_iters = 1 # epoch
+experiment_config.max_n_iters = 300 # epoch
 experiment_config.loggers = ["csv"]
 experiment_config.create_json = True
 experiment_config.save_folder = "results"

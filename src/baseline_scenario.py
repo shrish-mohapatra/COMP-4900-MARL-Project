@@ -19,6 +19,10 @@ class Scenario(BaseScenario):
         - speaker_1 "civilian"
         - speaker_2 "policeHQ"
         """
+        self.moving_target = False
+        if "moving_target" in kwargs:
+            self.moving_target = kwargs["moving_target"]
+
         world = World(batch_dim=batch_dim, device=device, dim_c=6)
 
         self.MIN_DISTANCE = 0.01
@@ -58,26 +62,16 @@ class Scenario(BaseScenario):
         world.add_agent(agent)
         ###############################################
 
-        # Add speaker agents
-        num_speakers = 2
-        # for i in range(num_speakers):
-        #     name = f"speaker_{i+1}"
-        #     agent = Agent(
-        #         name=name,
-        #         collide=False,
-        #         movable=False,
-        #         silent=False,
-        #         shape=Sphere(radius=0.075),
-        #     )
-        #     world.add_agent(agent)
-
         # Create map from agent name to agent
         self.agent_map = {}
         for agent in world.agents:
             self.agent_map[agent.name] = agent
 
         landmark = Landmark(
-            name=f"target", collide=False, shape=Sphere(radius=0.04)
+            name=f"target",
+            collide=False,
+            shape=Sphere(radius=0.04),
+            movable=self.moving_target,
         )
         world.add_landmark(landmark)
 
@@ -115,7 +109,27 @@ class Scenario(BaseScenario):
                 ),
                 batch_index=env_index,
             )
+
+        if self.moving_target:
+            # Choose random direction for target to move in
+            self.moving_target_vel = torch.zeros(
+                (1, self.world.dim_p),
+                device=self.world.device,
+                dtype=torch.float32,
+            ).uniform_(
+                -0.05,
+                0.05,
+            )
+
         self.rew = torch.zeros(self.world.batch_dim, device=self.world.device)
+
+    def process_action(self, agent: Agent):
+        if self.moving_target:
+            # Move target to assigned random direction at each step
+            self.world.target.set_vel(
+                self.moving_target_vel,
+                batch_index=None,
+            )
 
     def reward(self, agent: Agent):
         # squared distance from listener to landmark
@@ -150,7 +164,7 @@ class Scenario(BaseScenario):
         # listener.pos - goal.pos < threshold -> done :D
         # [ True, False, False, ... n_envs]
 
-    def observation(self, agent):
+    def observation(self, agent: Agent):
         """Compute observation tensor for specific agent"""
         # change this if we increase number of agents
         if agent.name == "listener_0":

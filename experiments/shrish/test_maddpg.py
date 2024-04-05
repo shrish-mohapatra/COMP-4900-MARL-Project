@@ -17,8 +17,8 @@ task = BaselineVmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 print(task)
 
 # Loads from "benchmarl/conf/algorithm/mappo.yaml"
-algorithm_config = MappoConfig.get_from_yaml()
-# algorithm_config = MaddpgConfig.get_from_yaml()
+# algorithm_config = MappoConfig.get_from_yaml()
+algorithm_config = MaddpgConfig.get_from_yaml()
 
 # Loads from "benchmarl/conf/model/layers/mlp.yaml"
 model_config = MlpConfig.get_from_yaml()
@@ -30,10 +30,10 @@ experiment_config.off_policy_collected_frames_per_batch = 1_000
 experiment_config.evaluation = True
 experiment_config.render = True
 # experiment_config.evaluation_interval = 12_000
-experiment_config.evaluation_interval = 1_000
+experiment_config.evaluation_interval = 10_000
 experiment_config.evaluation_episodes = 10
 
-experiment_config.max_n_iters = 1 # epoch
+experiment_config.max_n_iters = 150 # epoch
 experiment_config.loggers = ["csv"]
 experiment_config.create_json = True
 experiment_config.save_folder = "results"
@@ -41,8 +41,8 @@ if torch.cuda.is_available():
     print('running cuda')
     experiment_config.sampling_device = 'cuda'
     experiment_config.train_device = 'cuda'
-# experiment_config.off_policy_train_batch_size = 256
-experiment_config.on_policy_minibatch_size = 600
+experiment_config.off_policy_train_batch_size = 64
+# experiment_config.on_policy_minibatch_size = 400
 
 # Create the experiment
 experiment = Experiment(
