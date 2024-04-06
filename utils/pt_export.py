@@ -11,12 +11,12 @@ def convert_pt_to_gif(folder_path: str):
     video_names = os.listdir(folder_path)
 
     for video_name in video_names:
-        VID_NAME = f'{folder_path}/{video_name}'
+        VID_NAME = os.path.join(folder_path, video_name)
 
         folder = 'frames'
         os.makedirs(folder, exist_ok=True)
 
-        tensor = torch.load(f'./{VID_NAME}')
+        tensor = torch.load(VID_NAME)
         frames = tensor.shape[1]
 
         for i in range(frames):
@@ -29,3 +29,5 @@ def convert_pt_to_gif(folder_path: str):
 
         imageio.mimsave(f'{VID_NAME}.gif', images, fps=100)
         shutil.rmtree(folder)
+        file_path = os.path.join(folder_path, video_name)
+        os.remove(file_path)
