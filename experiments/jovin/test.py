@@ -13,14 +13,14 @@ import torch
 experiment_config = ExperimentConfig.get_from_yaml()
 
 # Loads from "benchmarl/conf/task/vmas/balance.yaml"
-# task = BaselineVmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
+task = BaselineVmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 # task = Ext1VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
-task = Ext2VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
+# task = Ext2VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 print(task)
 
 # Loads from "benchmarl/conf/algorithm/mappo.yaml"
-# algorithm_config = MappoConfig.get_from_yaml()
-algorithm_config = MaddpgConfig.get_from_yaml()
+algorithm_config = MappoConfig.get_from_yaml()
+# algorithm_config = MaddpgConfig.get_from_yaml()
 
 # Loads from "benchmarl/conf/model/layers/mlp.yaml"
 model_config = MlpConfig.get_from_yaml()
@@ -32,10 +32,11 @@ experiment_config.off_policy_collected_frames_per_batch = 1_000
 experiment_config.evaluation = True
 experiment_config.render = True
 # experiment_config.evaluation_interval = 12_000
-experiment_config.evaluation_interval = 5_000
+experiment_config.evaluation_interval = 500_000
 experiment_config.evaluation_episodes = 10
+experiment_config.max_n_frames = 8000000
 
-experiment_config.max_n_iters = 5 # epoch
+experiment_config.max_n_iters = 8000 # epoch
 experiment_config.loggers = ["csv"]
 experiment_config.create_json = True
 experiment_config.save_folder = "results"
