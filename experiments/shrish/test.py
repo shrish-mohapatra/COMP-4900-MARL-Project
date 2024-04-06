@@ -5,6 +5,7 @@ from benchmarl.models.mlp import MlpConfig
 
 from src.BaselineVmasTask import BaselineVmasTask
 from src.Ext1VmasTask import Ext1VmasTask
+from src.CustomExperiment import CustomExperiment
 from utils.pt_export import convert_pt_to_gif
 import torch
 
@@ -33,7 +34,7 @@ experiment_config.render = True
 experiment_config.evaluation_interval = 1_000
 experiment_config.evaluation_episodes = 10
 
-experiment_config.max_n_iters = 1 # epoch
+experiment_config.max_n_iters = 8 # epoch
 experiment_config.loggers = ["csv"]
 experiment_config.create_json = True
 experiment_config.save_folder = "results"
@@ -45,7 +46,7 @@ if torch.cuda.is_available():
 experiment_config.on_policy_minibatch_size = 600
 
 # Create the experiment
-experiment = Experiment(
+experiment = CustomExperiment(
     task=task,
     algorithm_config=algorithm_config,
     model_config=model_config,

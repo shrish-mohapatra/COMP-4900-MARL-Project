@@ -54,7 +54,7 @@ class LSTMMlp(Model):
         self.output_features = self.output_leaf_spec.shape[-1]
 
         if self.input_has_agent_dim:
-            print("DEBUG using MultiAgentLSTM")
+            # print("DEBUG using MultiAgentLSTM")
             print(f"n_agent_inputs={self.input_features}")
             print(f"n_agent_outputs={self.output_features}")
             print(f"n_agents={self.n_agents}")
