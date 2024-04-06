@@ -5,6 +5,9 @@ from benchmarl.models.mlp import MlpConfig
 
 from src.BaselineVmasTask import BaselineVmasTask
 from src.Ext1VmasTask import Ext1VmasTask
+from src.Ext2VmasTask import Ext2VmasTask
+from src.Ext3VmasTask import Ext3VmasTask
+from src.Ext4VmasTask import Ext4VmasTask
 from src.lstm_model import LSTMMlpConfig
 
 from utils.pt_export import convert_pt_to_gif
@@ -15,13 +18,13 @@ import os
 experiment_config = ExperimentConfig.get_from_yaml()
 
 # Loads from "benchmarl/conf/task/vmas/balance.yaml"
-task = BaselineVmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
+task = Ext4VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 # task = Ext1VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 print(task)
 
 # Loads from "benchmarl/conf/algorithm/mappo.yaml"
-# algorithm_config = MappoConfig.get_from_yaml()
-algorithm_config = MaddpgConfig.get_from_yaml()
+algorithm_config = MappoConfig.get_from_yaml()
+# algorithm_config = MaddpgConfig.get_from_yaml()
 
 # Loads from "benchmarl/conf/model/layers/mlp.yaml"
 # model_config = MlpConfig.get_from_yaml()

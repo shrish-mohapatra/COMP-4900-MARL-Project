@@ -30,19 +30,25 @@ class Ext3VmasTask(Task):
         seed: Optional[int],
         device: DEVICE_TYPING,
     ) -> Callable[[], EnvBase]:
-        print("using extension 3: moving target")
-        self.config["moving_target"] = True
+        print("using extension 3: messages out of order")
 
-        return lambda: VmasEnv(
-            scenario=Scenario(),
-            num_envs=num_envs,
-            continuous_actions=continuous_actions,
-            seed=seed,
-            device=device,
-            categorical_actions=True,
-            clamp_actions=True,
-            **self.config,
-        )
+        def env_generator():
+            env = VmasEnv(
+                scenario=Scenario(),
+                num_envs=num_envs,
+                continuous_actions=continuous_actions,
+                seed=seed,
+                device=device,
+                categorical_actions=True,
+                clamp_actions=True,
+                **self.config,
+            )
+            # TODO: change below
+            transform = RandomizeMessageOrder(device=device)
+            transformed_env = TransformedEnv(env, transform)
+            return transformed_env
+        
+        return env_generator
 
     def supports_continuous_actions(self) -> bool:
         return True

@@ -1,17 +1,17 @@
-import random
 import torch
 from torchrl.envs.transforms import Transform
 from tensordict.tensordict import TensorDictBase
 
 
 class BlockListener(Transform):
-    def __init__(self, blockage_rate: float):
+    def __init__(self, blockage_rate: float, device):
         """
         Args
         - blockage_rate: chance of message being blocked between 0 and 1
         """
         super().__init__()
         self.blockage_rate = blockage_rate
+        self.device = device
 
     def _step(
         self, tensordict: TensorDictBase, next_tensordict: TensorDictBase
@@ -22,8 +22,8 @@ class BlockListener(Transform):
             msg_size //= 2
             
             # Generate binary decisions based on probabilities for each speaker
-            decisions_speaker1 = torch.rand(batch_size) > self.blockage_rate
-            decisions_speaker2 = torch.rand(batch_size) > self.blockage_rate
+            decisions_speaker1 = torch.rand(batch_size, device=self.device) > self.blockage_rate
+            decisions_speaker2 = torch.rand(batch_size, device=self.device) > self.blockage_rate
 
             # print(f"\ndecisions_speaker1\n{decisions_speaker1}")
             # print(f"\ndecisions_speaker2\n{decisions_speaker2}")

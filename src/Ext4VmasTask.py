@@ -15,11 +15,11 @@ from benchmarl.environments.common import Task
 from benchmarl.utils import DEVICE_TYPING
 
 from src.baseline_scenario import Scenario
-from src.transforms.BlockListener import BlockListener
+from src.transforms.RandomizeMessageOrder import RandomizeMessageOrder
 # from src.baseline_scenario_wip import Scenario
 
 
-class Ext1VmasTask(Task):
+class Ext4VmasTask(Task):
 
     SIMPLE_SPEAKER_LISTENER = None
 
@@ -30,7 +30,8 @@ class Ext1VmasTask(Task):
         seed: Optional[int],
         device: DEVICE_TYPING,
     ) -> Callable[[], EnvBase]:
-        print("using extesnion 1: blocked messages")
+        self.config["malicious_speaker"] = 1
+        print("using extension 4: malicious speaker")
 
         def env_generator():
             env = VmasEnv(
@@ -43,7 +44,8 @@ class Ext1VmasTask(Task):
                 clamp_actions=True,
                 **self.config,
             )
-            transform = BlockListener(0.2, device=device)
+            # TODO: change below
+            transform = RandomizeMessageOrder(device=device)
             transformed_env = TransformedEnv(env, transform)
             return transformed_env
         

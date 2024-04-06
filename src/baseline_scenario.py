@@ -20,9 +20,11 @@ class Scenario(BaseScenario):
         - speaker_2 "policeHQ"
         """
         self.moving_target = False
+        self.malicious_speaker = 0
         if "moving_target" in kwargs:
             self.moving_target = kwargs["moving_target"]
-
+        if 'malicious_speaker' in kwargs:
+            self.malicious_speaker = kwargs['malicious_speaker']
         world = World(batch_dim=batch_dim, device=device, dim_c=6)
 
         self.MIN_DISTANCE = 0.01
@@ -60,6 +62,19 @@ class Scenario(BaseScenario):
             shape=Sphere(radius=0.075),
         )
         world.add_agent(agent)
+
+        agent_num = len(world.agents) - 1
+        for i in range(self.malicious_speaker):
+            name = f"{i}malicious_{i + agent_num}"
+            agent = Agent(
+                name=name,
+                collide=False,
+                movable=False,
+                silent=False,
+                shape=Sphere(radius=0.075),
+                action_script=self.action_script_creator()
+            )
+            world.add_agent(agent)
         ###############################################
 
         # Create map from agent name to agent
@@ -78,6 +93,11 @@ class Scenario(BaseScenario):
         # created attribute for easier access
         world.target = landmark
         return world
+    
+    def action_script_creator(self):
+        def action_script(agent, world):
+            agent.action.u = torch.rand((world.batch_dim, world.dim_p))
+        return action_script
 
     def reset_world_at(self, env_index: int = None):
         # set random initial states
@@ -130,6 +150,9 @@ class Scenario(BaseScenario):
                 self.moving_target_vel,
                 batch_index=None,
             )
+        
+        if agent.action_script is not None:
+            agent.action.c = torch.rand(self.world.batch_dim, self.world.dim_c)
 
     def reward(self, agent: Agent):
         # squared distance from listener to landmark

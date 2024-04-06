@@ -4,7 +4,7 @@ from benchmarl.experiment import Experiment, ExperimentConfig
 from benchmarl.models.mlp import MlpConfig
 
 from src.BaselineVmasTask import BaselineVmasTask
-from src.Ext3VmasTask import Ext3VmasTask
+from Ext2VmasTask import Ext3VmasTask
 from utils.pt_export import convert_pt_to_gif
 import torch
 

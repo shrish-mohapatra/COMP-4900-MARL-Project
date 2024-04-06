@@ -30,25 +30,19 @@ class Ext2VmasTask(Task):
         seed: Optional[int],
         device: DEVICE_TYPING,
     ) -> Callable[[], EnvBase]:
-        print("using extension 2")
+        print("using extension 2: moving target")
+        self.config["moving_target"] = True
 
-        def env_generator():
-            env = VmasEnv(
-                scenario=Scenario(),
-                num_envs=num_envs,
-                continuous_actions=continuous_actions,
-                seed=seed,
-                device=device,
-                categorical_actions=True,
-                clamp_actions=True,
-                **self.config,
-            )
-            # TODO: change below
-            transform = RandomizeMessageOrder(0.5)
-            transformed_env = TransformedEnv(env, transform)
-            return transformed_env
-        
-        return env_generator
+        return lambda: VmasEnv(
+            scenario=Scenario(),
+            num_envs=num_envs,
+            continuous_actions=continuous_actions,
+            seed=seed,
+            device=device,
+            categorical_actions=True,
+            clamp_actions=True,
+            **self.config,
+        )
 
     def supports_continuous_actions(self) -> bool:
         return True
