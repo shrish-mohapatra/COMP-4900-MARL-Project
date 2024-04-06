@@ -18,7 +18,7 @@ import os
 experiment_config = ExperimentConfig.get_from_yaml()
 
 # Loads from "benchmarl/conf/task/vmas/balance.yaml"
-task = Ext4VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
+task = Ext1VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 # task = Ext1VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 print(task)
 

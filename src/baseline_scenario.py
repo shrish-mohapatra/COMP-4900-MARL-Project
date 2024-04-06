@@ -141,6 +141,11 @@ class Scenario(BaseScenario):
                 0.05,
             )
 
+        self.norm_factor = torch.sqrt(
+            torch.sum(
+                torch.square(self.world.target.state.pos - self.agent_map["listener_0"].state.pos), dim=-1
+            )
+        ) * 300
         self.rew = torch.zeros(self.world.batch_dim, device=self.world.device)
 
     def process_action(self, agent: Agent):
@@ -162,7 +167,7 @@ class Scenario(BaseScenario):
             torch.sum(
                 torch.square(self.world.target.state.pos - self.agent_map["listener_0"].state.pos), dim=-1
             )
-        ) / 100
+        ) / self.norm_factor
 
         cur_distance = torch.linalg.vector_norm(
             (self.agent_map["listener_0"].state.pos -
@@ -170,8 +175,7 @@ class Scenario(BaseScenario):
             dim=1
         )
         updates = cur_distance <= self.MIN_DISTANCE
-        self.rew[updates] += 20000
-
+        self.rew[updates] += 100
         return self.rew
 
     def done(self):
