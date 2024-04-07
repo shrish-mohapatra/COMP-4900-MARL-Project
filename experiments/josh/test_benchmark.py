@@ -29,10 +29,10 @@ experiment_config = ExperimentConfig.get_from_yaml()
 # task = Ext1VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 tasks = [
     BaselineVmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml(), 
-    # Ext1VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml(), 
-    # Ext2VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml(), 
-    # Ext3VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml(), 
-    # Ext4VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
+    Ext1VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml(), 
+    Ext2VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml(), 
+    Ext3VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml(), 
+    Ext4VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 ]
 # task = Ext1VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 # print(task)
@@ -57,10 +57,10 @@ experiment_config.off_policy_collected_frames_per_batch = 1_000
 experiment_config.evaluation = True
 experiment_config.render = True
 # experiment_config.evaluation_interval = 12_000
-experiment_config.evaluation_interval = 10_000
+experiment_config.evaluation_interval = 150_000
 experiment_config.evaluation_episodes = 10
 
-experiment_config.max_n_iters = 50 # epoch
+experiment_config.max_n_iters = 1500 # epoch
 experiment_config.max_n_frames = 8_000_000
 experiment_config.loggers = ["csv"]
 experiment_config.create_json = True
@@ -98,7 +98,7 @@ if __name__ == "__main__":
         tasks=tasks,
         seeds=seeds,
         experiment_config=experiment_config,
-        num_process=3,
+        num_process=4,
     )
 
     # benchmark.run_sequential()

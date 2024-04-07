@@ -18,7 +18,7 @@ from benchmarl.models.common import ModelConfig
 from src.CustomExperiment import CustomExperiment
 from src.BaselineVmasTask import BaselineVmasTask
 from utils.pt_export import convert_pt_to_gif
-
+import traceback
 
 from benchmarl.algorithms import MappoConfig
 from benchmarl.models.mlp import MlpConfig
@@ -228,6 +228,7 @@ class Benchmark:
             raise interrupt
         except Exception as e:
             print(f'The following experiment failed: {e}')
+            traceback.print_exc()
             self.display_experiment(experiment)
 
     def run_sequential(self):
