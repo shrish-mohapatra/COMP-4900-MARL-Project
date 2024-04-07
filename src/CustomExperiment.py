@@ -7,17 +7,53 @@ from torchrl.collectors import SyncDataCollector
 from torchrl.envs import SerialEnv, TransformedEnv
 from torchrl.envs.transforms import Compose
 from tensordict.nn import TensorDictSequential
+from tensordict import TensorDictBase
 
 from tqdm import tqdm
 
 
-freeze_timeline = {
-    1: ["listener"],
-    3: ["civilian", "policeHQ"],
-    6: None,
-}
+# freeze_timeline = {
+#     100: ["civilian", "policeHQ"],
+#     1100: ["listener"],
+#     2100: None,
+# }
+
+freeze_timeline = {}
+
 
 class CustomExperiment(Experiment):
+
+    def _optimizer_loop(self, group: str) -> TensorDictBase:
+        subdata = self.replay_buffers[group].sample()
+        loss_vals = self.losses[group](subdata)
+        training_td = loss_vals.detach()
+        loss_vals = self.algorithm.process_loss_vals(group, loss_vals)
+
+        for loss_name, loss_value in loss_vals.items():
+            # print(f"DEBUG loss_name={loss_name} loss_value={loss_value}")
+            if loss_name in self.optimizers[group].keys():
+                optimizer = self.optimizers[group][loss_name]
+
+                loss_value.backward()
+
+                grad_norm = self._grad_clip(optimizer)
+
+                training_td.set(
+                    f"grad_norm_{loss_name}",
+                    torch.tensor(grad_norm, device=self.config.train_device),
+                )
+
+                optimizer.step()
+                optimizer.zero_grad()
+        self.replay_buffers[group].update_tensordict_priority(subdata)
+        if self.target_updaters[group] is not None:
+            self.target_updaters[group].step()
+
+        callback_loss = self._on_train_step(subdata, group)
+        if callback_loss is not None:
+            training_td.update(callback_loss)
+
+        return training_td
 
     def _collection_loop(self):
         pbar = tqdm(
@@ -40,7 +76,8 @@ class CustomExperiment(Experiment):
                 task=self.task,
                 step=self.n_iters_performed,
             )
-            pbar.set_description(f"mean return = {self.mean_return}", refresh=False)
+            pbar.set_description(
+                f"mean return = {self.mean_return}", refresh=False)
 
             # Callback
             self._on_batch_collected(batch)
@@ -51,20 +88,18 @@ class CustomExperiment(Experiment):
             # TODO: check eval agents before trianing lil bro
             # self.n_iters_performed
 
-
             # group_map isn't reset every loop
             if self.n_iters_performed in freeze_timeline:
                 self.train_group_map = copy.deepcopy(self.group_map)
-                
+
                 agents_to_freeze = freeze_timeline[self.n_iters_performed]
                 if agents_to_freeze is not None:
                     for agent in agents_to_freeze:
                         self.train_group_map.pop(agent)
 
-
-            print(f"DEBUG train_group_map={self.train_group_map}")
+            # print(f"DEBUG train_group_map={self.train_group_map}")
             for group in self.train_group_map.keys():
-                print(f"DEBUG training group={group}")
+                # print(f"DEBUG training group={group}")
                 group_batch = batch.exclude(*self._get_excluded_keys(group))
                 group_batch = self.algorithm.process_batch(group, group_batch)
                 group_batch = group_batch.reshape(-1)
@@ -182,7 +217,7 @@ class CustomExperiment(Experiment):
     #     self.policy = self.algorithm.get_policy_for_collection()
 
     #     self.group_policies = {}
-    #     eval_groups = ["listener"] 
+    #     eval_groups = ["listener"]
     #     for group in self.group_map.keys():
     #         print(f"DEBUG group={group}")
     #         group_policy = self.policy.select_subsequence(out_keys=[(group, "action")])

@@ -48,6 +48,7 @@ class Scenario(BaseScenario):
             name=name,
             collide=False,
             movable=False,
+            rotatable=False,
             silent=False,
             shape=Sphere(radius=0.075),
         )
@@ -58,6 +59,7 @@ class Scenario(BaseScenario):
             name=name,
             collide=False,
             movable=False,
+            rotatable=False,
             silent=False,
             shape=Sphere(radius=0.075),
         )
@@ -70,6 +72,7 @@ class Scenario(BaseScenario):
                 name=name,
                 collide=False,
                 movable=False,
+                rotatable=False,
                 silent=False,
                 shape=Sphere(radius=0.075),
                 action_script=self.action_script_creator()
@@ -190,6 +193,10 @@ class Scenario(BaseScenario):
         return result
         # listener.pos - goal.pos < threshold -> done :D
         # [ True, False, False, ... n_envs]
+    
+    # def info(self, agent: Agent) -> torch.Dict[str, torch.Tensor]:
+    #     info = {"communication": agent.state.c}
+    #     return info
 
     def observation(self, agent: Agent):
         """Compute observation tensor for specific agent"""
