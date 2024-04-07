@@ -91,8 +91,8 @@ def main():
         run_curriculum=True
     )
 
-    # benchmark.run_sequential()
-    benchmark.run_parallel()
+    benchmark.run_sequential()
+    # benchmark.run_parallel()
 
     # Log experiment folder path
     # print(experiment.name)
