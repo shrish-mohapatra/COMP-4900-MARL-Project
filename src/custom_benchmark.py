@@ -32,7 +32,7 @@ class Benchmark:
         seeds (set of int): the seeds for the benchmark
         experiment_config (ExperimentConfig): the experiment config
         critic_model_config (ModelConfig, optional): the config of the critic model. Defaults to model_config
-        num_process (int): number of processes to run at a time
+        num_process (int): number of processes to run at a time for parallelization
     """
 
     def __init__(
@@ -43,7 +43,7 @@ class Benchmark:
         seeds: Set[int],
         experiment_config: ExperimentConfig,
         critic_model_config: Optional[ModelConfig] = None,
-        num_process = 1,
+        num_process=1,
     ):
         self.algorithm_configs = algorithm_configs
         self.tasks = tasks
@@ -77,7 +77,21 @@ class Benchmark:
                             critic_model_config=self.critic_model_config,
                             config=self.experiment_config,
                         )
-        
+
+    def get_experiments_kwargs(self) -> Iterator[dict]:
+        for model_config in self.model_configs:
+            for algorithm_config in self.algorithm_configs:
+                for task in self.tasks:
+                    for seed in self.seeds:
+                        yield {
+                            "task": task,
+                            "algorithm_config": algorithm_config,
+                            "seed": seed,
+                            "model_config": model_config,
+                            "critic_model_config": self.critic_model_config,
+                            "config": self.experiment_config,
+                        }
+
         # Curriculum learning for baseline only
         # ex. freeze_timeline = {
         #     100: ["civilian", "policeHQ"],
@@ -95,52 +109,78 @@ class Benchmark:
         }
         print(f"curriculum freeze={freeze_timeline}")
 
-        yield CustomExperiment(
-            freeze_timeline=freeze_timeline,
-            task=self.tasks[0],
-            algorithm_config=self.algorithm_configs[0],
-            seed=list(self.seeds)[0],
-            model_config=self.model_configs[0],
-            critic_model_config=self.critic_model_config,
-            config=self.experiment_config,
-        )
-    
-    def display_experiment(self, experiment: Experiment):
-        print(json.dumps({
-            "task": str(type(experiment.task)),
-            "algorithm": str(type(experiment.algorithm_config)),
-            "model": str(type(experiment.model_config)),
-        }, indent=2))
-    
-    def run_parallel(self):
-        pass
+        yield {
+            "freeze_timeline": freeze_timeline,
+            "task": self.tasks[0],
+            "algorithm_config": self.algorithm_configs[0],
+            "seed": list(self.seeds)[0],
+            "model_config": self.model_configs[0],
+            "critic_model_config": self.critic_model_config,
+            "config": self.experiment_config,
+        }
 
-    def run_sequential(self):
-        # experiments = self.get_experiments()
-        """
-        def get_experiment_and_run():
-            epxeirment = self.get_next_experiments()
+    def display_experiment(self, experiment: Experiment, experiment_index: int):
+        print(
+            json.dumps({
+                "msg": f"Running experiment {experiment_index+1}/{self.n_experiments}",
+                "task": str(type(experiment.task)),
+                "algorithm": str(type(experiment.algorithm_config)),
+                "model": str(type(experiment.model_config)),
+            }, indent=2)
+        )
+
+    def run_parallel(self):
+        start_time = time.time()
+        experiment_queue = mp.Queue(maxsize=self.num_process)
+
+        # Start worker processes
+        processes = []
+        for _ in range(self.num_process):
+            p = mp.Process(target=self._worker, args=(experiment_queue,))
+            processes.append(p)
+            p.start()
+
+        # Feed experiments into queue
+        for i, experiment_kwargs in enumerate(self.get_experiments_kwargs()):
+            experiment_queue.put((i, experiment_kwargs))
+
+        # Signal workers to stop by adding 'None' to the queue for each worker
+        for i in range(self.num_process):
+            experiment_queue.put((i, None))
+
+        # Wait for all workers to finish
+        for p in processes:
+            p.join()
+
+        print(f'benchmark took {time.time() - start_time} seconds in total')
+
+    def _worker(self, experiment_queue: mp.Queue):
+        """Worker function to process experiments from queue"""
+        while True:
+            experiment_index, experiment_kwargs = experiment_queue.get()
+            if experiment_kwargs is None:
+                break
+
+            experiment = CustomExperiment(**experiment_kwargs)
+            self.display_experiment(experiment, experiment_index)
+            self.run_experiment(experiment)
+
+    def run_experiment(self, experiment: Experiment):
+        try:
             experiment.run()
 
-        Process(task=get_experiment_and_run)
+            convert_start_time = time.time()
+            video_file_path = f'{experiment.config.save_folder}/{experiment.name}/{experiment.name}/videos'
+            convert_pt_to_gif(video_file_path)
+            conversion_time = time.time() - convert_start_time
+            print(f'video conversion took {conversion_time} seconds')
+        except KeyboardInterrupt as interrupt:
+            print("\n\nBenchmark was closed gracefully\n\n")
+            experiment.close()
+            raise interrupt
 
-        """
-        pass
-
-
+    def run_sequential(self):
         """Run all the experiments in the benchmark in a sequence."""
         for i, experiment in enumerate(self.get_experiments()):
-            self.display_experiment(experiment)
-            print(f"\nRunning experiment {i+1}/{self.n_experiments}.\n")
-
-            try:
-                experiment.run()
-                start_time = time.time()
-                video_file_path = f'{experiment.config.save_folder}/{experiment.name}/{experiment.name}/videos'
-                convert_pt_to_gif(video_file_path)
-                print(f'video conversion took {time.time() - start_time} seconds')
-            except KeyboardInterrupt as interrupt:
-                print("\n\nBenchmark was closed gracefully\n\n")
-                experiment.close()
-                raise interrupt
-
+            self.display_experiment(experiment, i)
+            self.run_experiment(experiment)

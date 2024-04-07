@@ -24,8 +24,16 @@ from tqdm import tqdm
 # }
 
 class CustomExperiment(Experiment):
-    def __init__(self, freeze_timeline, task: Task, algorithm_config: AlgorithmConfig, model_config: ModelConfig, seed: int, config: ExperimentConfig, critic_model_config: ModelConfig | None = None, callbacks: torch.List[Callback] | None = None):
-        super().__init__(task, algorithm_config, model_config, seed, config, critic_model_config, callbacks)
+    def __init__(self, task: Task, algorithm_config: AlgorithmConfig, model_config: ModelConfig, seed: int, config: ExperimentConfig, critic_model_config: ModelConfig = None, freeze_timeline: dict = {}, callbacks: torch.List[Callback] = None):
+        super().__init__(
+            task,
+            algorithm_config,
+            model_config,
+            seed,
+            config,
+            critic_model_config,
+            callbacks
+        )
         self.freeze_timeline = freeze_timeline
 
     def _collection_loop(self):
