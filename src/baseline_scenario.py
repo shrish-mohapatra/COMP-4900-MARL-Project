@@ -144,11 +144,11 @@ class Scenario(BaseScenario):
                 0.05,
             )
 
-        self.norm_factor = torch.sqrt(
+        self.goal_rew = torch.sqrt(
             torch.sum(
                 torch.square(self.world.target.state.pos - self.agent_map["listener_0"].state.pos), dim=-1
             )
-        ) * 300
+        ) * 3000
         self.rew = torch.zeros(self.world.batch_dim, device=self.world.device)
 
     def process_action(self, agent: Agent):
@@ -166,11 +166,12 @@ class Scenario(BaseScenario):
         # squared distance from listener to landmark
 
         # TODO: maybe change this to cummulative
-        self.rew -= torch.sqrt(
+        self.rew = -torch.sqrt(
             torch.sum(
                 torch.square(self.world.target.state.pos - self.agent_map["listener_0"].state.pos), dim=-1
             )
-        ) / self.norm_factor
+        )
+        self.goal_rew -= self.goal_rew * 0.01
 
         cur_distance = torch.linalg.vector_norm(
             (self.agent_map["listener_0"].state.pos -
@@ -178,14 +179,14 @@ class Scenario(BaseScenario):
             dim=1
         )
         updates = cur_distance <= self.MIN_DISTANCE
-        self.rew[updates] += 100
+        self.rew[updates] += self.goal_rew
         return self.rew
 
     def done(self):
         cur_distance = torch.linalg.vector_norm(
             (self.agent_map["listener_0"].state.pos -
              self.world.target.state.pos),
-            dim=1
+            dim=1, device=self.world.device
         )
         result = cur_distance <= self.MIN_DISTANCE
         # if result.any():
