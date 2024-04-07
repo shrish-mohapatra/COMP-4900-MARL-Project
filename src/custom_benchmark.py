@@ -47,6 +47,7 @@ class Benchmark:
         experiment_config: ExperimentConfig,
         critic_model_config: Optional[ModelConfig] = None,
         num_process=1,
+        run_curriculum=False
     ):
         self.algorithm_configs = algorithm_configs
         self.tasks = tasks
@@ -58,6 +59,7 @@ class Benchmark:
         )
         self.experiment_config = experiment_config
         self.num_process = num_process
+        self.run_curriculum = run_curriculum
 
         print(f"Created benchmark with {self.n_experiments} experiments.")
 
