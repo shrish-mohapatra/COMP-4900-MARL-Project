@@ -9,6 +9,8 @@ from src.Ext2VmasTask import Ext2VmasTask
 from src.Ext3VmasTask import Ext3VmasTask
 from src.Ext4VmasTask import Ext4VmasTask
 from src.lstm_model import LSTMMlpConfig
+from src.custom_benchmark import Benchmark
+from src.MappoDecoder import MappoDecoderConfig
 
 from utils.pt_export import convert_pt_to_gif
 import torch
@@ -16,23 +18,36 @@ import os
 import time
 
 start_time = time.time()
+
+seeds = { 69 }
 # Loads from "benchmarl/conf/experiment/base_experiment.yaml"
 experiment_config = ExperimentConfig.get_from_yaml()
 
 # Loads from "benchmarl/conf/task/vmas/balance.yaml"
-task = Ext1VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
 # task = Ext1VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
-print(task)
+tasks = [
+    BaselineVmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml(), 
+    Ext1VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml(), 
+    Ext2VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml(), 
+    Ext3VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml(), 
+    Ext4VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
+]
+# task = Ext1VmasTask.SIMPLE_SPEAKER_LISTENER.get_from_yaml()
+# print(task)
 
 # Loads from "benchmarl/conf/algorithm/mappo.yaml"
-algorithm_config = MappoConfig.get_from_yaml()
+algorithm_config_path = os.path.join('src', 'mappodecoder.yaml')
+# algorithm_config = MappoDecoderConfig.get_from_yaml(algorithm_config_path)
+# algorithm_config = MappoConfig.get_from_yaml()
+algorithm_configs = [MappoConfig.get_from_yaml(), MappoDecoderConfig.get_from_yaml(algorithm_config_path)]
 # algorithm_config = MaddpgConfig.get_from_yaml()
 
 # Loads from "benchmarl/conf/model/layers/mlp.yaml"
 # model_config = MlpConfig.get_from_yaml()
 model_config_path = os.path.join('src', 'lstmmlp.yaml')
-model_config = LSTMMlpConfig.get_from_yaml(model_config_path)
-critic_model_config = MlpConfig.get_from_yaml()
+# model_config = LSTMMlpConfig.get_from_yaml(model_config_path)
+# critic_model_config = MlpConfig.get_from_yaml()
+model_configs = [MlpConfig.get_from_yaml(), LSTMMlpConfig.get_from_yaml(model_config_path)]
 
 # THIS IS VERY IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 experiment_config.on_policy_collected_frames_per_batch = 1_000
@@ -40,10 +55,10 @@ experiment_config.off_policy_collected_frames_per_batch = 1_000
 experiment_config.evaluation = True
 experiment_config.render = True
 # experiment_config.evaluation_interval = 12_000
-experiment_config.evaluation_interval = 500_000
+experiment_config.evaluation_interval = 2000
 experiment_config.evaluation_episodes = 10
 
-experiment_config.max_n_iters = 8000 # epoch
+experiment_config.max_n_iters = 2 # epoch
 experiment_config.max_n_frames = 8_000_000
 experiment_config.loggers = ["csv"]
 experiment_config.create_json = True
@@ -56,24 +71,28 @@ experiment_config.off_policy_train_batch_size = 400
 experiment_config.on_policy_minibatch_size = 400
 
 # Create the experiment
-experiment = Experiment(
-    task=task,
-    algorithm_config=algorithm_config,
-    model_config=model_config,
-    critic_model_config=critic_model_config,
-    seed=0,
-    config=experiment_config,
+# experiment = Experiment(
+#     task=task,
+#     algorithm_config=algorithm_config,
+#     model_config=model_config,
+#     critic_model_config=critic_model_config,
+#     seed=0,
+#     config=experiment_config,
+# )
+
+benchmark = Benchmark(
+    algorithm_configs=algorithm_configs,
+    model_configs=model_configs,
+    tasks=tasks,
+    seeds=seeds,
+    experiment_config=experiment_config,
 )
 
+benchmark.run_sequential()
+
 # Log experiment folder path
-print(experiment.name)
+# print(experiment.name)
 
 # Run experiment
-experiment.run()
-print(f'experiment took {time.time() - start_time} seconds')
-start_time = time.time()
-# Convert pt files to gifs
-video_file_path = f'{experiment_config.save_folder}/{experiment.name}/{experiment.name}/videos'
-convert_pt_to_gif(video_file_path)
-
-print(f'video conversion took {time.time() - start_time} seconds')
+# experiment.run()
+print(f'benchmark took {time.time() - start_time} seconds in total')

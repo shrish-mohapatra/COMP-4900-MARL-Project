@@ -30,7 +30,7 @@ class Ext2VmasTask(Task):
         seed: Optional[int],
         device: DEVICE_TYPING,
     ) -> Callable[[], EnvBase]:
-        print("using extension 2: moving target")
+        # print("using extension 2: moving target")
         self.config["moving_target"] = True
 
         return lambda: VmasEnv(

@@ -42,6 +42,7 @@ class ClipPPODecoderLoss(ClipPPOLoss):
         )
         actor_mlp = kwargs["actor"].module[0].module[0]
         self.agent_group = actor_mlp.agent_group
+        self.device = actor_mlp.device
 
         # Create decoder network for speakers only
         self.decoder_nn = None
@@ -49,7 +50,7 @@ class ClipPPODecoderLoss(ClipPPOLoss):
             self.decoder_nn = ObsDecoder(
                 encoded_size=8,
                 original_obs_size=actor_mlp.input_features,
-            )
+            ).to(device=self.device)
             self.decoder_loss = nn.MSELoss()
             self.decoder_optimizer = optim.Adam(
                 self.decoder_nn.parameters(),

@@ -55,11 +55,11 @@ class LSTMMlp(Model):
 
         if self.input_has_agent_dim:
             # print("DEBUG using MultiAgentLSTM")
-            print(f"n_agent_inputs={self.input_features}")
-            print(f"n_agent_outputs={self.output_features}")
-            print(f"n_agents={self.n_agents}")
-            print(f"centralised={self.centralised}")
-            print(f"share_params={self.share_params}")
+            # print(f"n_agent_inputs={self.input_features}")
+            # print(f"n_agent_outputs={self.output_features}")
+            # print(f"n_agents={self.n_agents}")
+            # print(f"centralised={self.centralised}")
+            # print(f"share_params={self.share_params}")
 
             self.mlp = MultiAgentLSTM(
                 n_agent_inputs=self.input_features,
@@ -81,7 +81,7 @@ class LSTMMlp(Model):
             #     **kwargs,
             # )
         else:
-            print("DEBUG using modulelist of LSTMNets")
+            # print("DEBUG using modulelist of LSTMNets")
             self.mlp = nn.ModuleList(
                 LSTMNet(
                     out_features=self.output_features,

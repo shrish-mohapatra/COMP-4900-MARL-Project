@@ -50,7 +50,7 @@ class LSTMNet(nn.Module):
         mlp_kwargs: Dict,
         device: Optional[DEVICE_TYPING] = None,
     ) -> None:
-        print("DEBUG: using custom LSTMNet weeeoeoeoeoe")
+        # print("DEBUG: using custom LSTMNet weeeoeoeoeoe")
         warnings.warn(
             "LSTMNet is being deprecated in favour of torchrl.modules.LSTMModule, and will be removed in v0.4.0.",
             category=DeprecationWarning,
@@ -197,4 +197,4 @@ class MultiAgentLSTM(MultiAgentMLP):
             ]
         )
 
-        print("DEBUG: Successfully created agent networks with LSTMNet")
+        # print("DEBUG: Successfully created agent networks with LSTMNet")

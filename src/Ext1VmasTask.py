@@ -30,7 +30,7 @@ class Ext1VmasTask(Task):
         seed: Optional[int],
         device: DEVICE_TYPING,
     ) -> Callable[[], EnvBase]:
-        print("using extesnion 1: blocked messages")
+        # print("using extension 1: blocked messages")
 
         def env_generator():
             env = VmasEnv(

@@ -31,7 +31,7 @@ class Ext4VmasTask(Task):
         device: DEVICE_TYPING,
     ) -> Callable[[], EnvBase]:
         self.config["malicious_speaker"] = 1
-        print("using extension 4: malicious speaker")
+        # print("using extension 4: malicious speaker")
 
         def env_generator():
             env = VmasEnv(

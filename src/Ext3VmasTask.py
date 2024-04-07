@@ -30,7 +30,7 @@ class Ext3VmasTask(Task):
         seed: Optional[int],
         device: DEVICE_TYPING,
     ) -> Callable[[], EnvBase]:
-        print("using extension 3: messages out of order")
+        # print("using extension 3: messages out of order")
 
         def env_generator():
             env = VmasEnv(

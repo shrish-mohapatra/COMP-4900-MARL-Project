@@ -28,7 +28,6 @@ class BaselineVmasTask(Task):
         seed: Optional[int],
         device: DEVICE_TYPING,
     ) -> Callable[[], EnvBase]:
-        print("")
         return lambda: VmasEnv(
             scenario=Scenario(),
             num_envs=num_envs,

@@ -3,6 +3,11 @@ import time
 import torch
 
 from benchmarl.experiment import Experiment, ExperimentConfig
+from benchmarl.environments import Task
+from benchmarl.algorithms.common import AlgorithmConfig
+from benchmarl.models.common import ModelConfig
+from benchmarl.experiment.callback import Callback
+
 from torchrl.collectors import SyncDataCollector
 from torchrl.envs import SerialEnv, TransformedEnv
 from torchrl.envs.transforms import Compose
@@ -18,42 +23,10 @@ from tqdm import tqdm
 #     2100: None,
 # }
 
-freeze_timeline = {}
-
-
 class CustomExperiment(Experiment):
-
-    def _optimizer_loop(self, group: str) -> TensorDictBase:
-        subdata = self.replay_buffers[group].sample()
-        loss_vals = self.losses[group](subdata)
-        training_td = loss_vals.detach()
-        loss_vals = self.algorithm.process_loss_vals(group, loss_vals)
-
-        for loss_name, loss_value in loss_vals.items():
-            # print(f"DEBUG loss_name={loss_name} loss_value={loss_value}")
-            if loss_name in self.optimizers[group].keys():
-                optimizer = self.optimizers[group][loss_name]
-
-                loss_value.backward()
-
-                grad_norm = self._grad_clip(optimizer)
-
-                training_td.set(
-                    f"grad_norm_{loss_name}",
-                    torch.tensor(grad_norm, device=self.config.train_device),
-                )
-
-                optimizer.step()
-                optimizer.zero_grad()
-        self.replay_buffers[group].update_tensordict_priority(subdata)
-        if self.target_updaters[group] is not None:
-            self.target_updaters[group].step()
-
-        callback_loss = self._on_train_step(subdata, group)
-        if callback_loss is not None:
-            training_td.update(callback_loss)
-
-        return training_td
+    def __init__(self, freeze_timeline, task: Task, algorithm_config: AlgorithmConfig, model_config: ModelConfig, seed: int, config: ExperimentConfig, critic_model_config: ModelConfig | None = None, callbacks: torch.List[Callback] | None = None):
+        super().__init__(task, algorithm_config, model_config, seed, config, critic_model_config, callbacks)
+        self.freeze_timeline = freeze_timeline
 
     def _collection_loop(self):
         pbar = tqdm(
@@ -89,10 +62,10 @@ class CustomExperiment(Experiment):
             # self.n_iters_performed
 
             # group_map isn't reset every loop
-            if self.n_iters_performed in freeze_timeline:
+            if self.n_iters_performed in self.freeze_timeline:
                 self.train_group_map = copy.deepcopy(self.group_map)
 
-                agents_to_freeze = freeze_timeline[self.n_iters_performed]
+                agents_to_freeze = self.freeze_timeline[self.n_iters_performed]
                 if agents_to_freeze is not None:
                     for agent in agents_to_freeze:
                         self.train_group_map.pop(agent)
@@ -168,75 +141,3 @@ class CustomExperiment(Experiment):
             sampling_start = time.time()
 
         self.close()
-
-    # def _setup_task(self):
-    #     test_env = self.model_config.process_env_fun(
-    #         self.task.get_env_fun(
-    #             num_envs=self.config.evaluation_episodes,
-    #             continuous_actions=self.continuous_actions,
-    #             seed=self.seed,
-    #             device=self.config.sampling_device,
-    #         )
-    #     )()
-    #     env_func = self.model_config.process_env_fun(
-    #         self.task.get_env_fun(
-    #             num_envs=self.config.n_envs_per_worker(self.on_policy),
-    #             continuous_actions=self.continuous_actions,
-    #             seed=self.seed,
-    #             device=self.config.sampling_device,
-    #         )
-    #     )
-    #     self.eval_groups = ["listener"]
-
-    #     self.observation_spec = self.task.observation_spec(test_env)
-    #     self.info_spec = self.task.info_spec(test_env)
-    #     self.state_spec = self.task.state_spec(test_env)
-    #     self.action_mask_spec = self.task.action_mask_spec(test_env)
-    #     self.action_spec = self.task.action_spec(test_env)
-    #     self.group_map = self.task.group_map(test_env)
-    #     self.train_group_map = copy.deepcopy(self.group_map)
-    #     print(f"DEBUG train_group_map={self.train_group_map}")
-    #     for key in self.eval_groups:
-    #         self.train_group_map.pop(key)
-    #     print(f"DEBUG train_group_map={self.train_group_map}")
-    #     self.max_steps = self.task.max_steps(test_env)
-    #     transforms = [self.task.get_reward_sum_transform(test_env)]
-    #     transform = Compose(*transforms)
-
-    #     if test_env.batch_size == ():
-    #         self.env_func = lambda: TransformedEnv(
-    #             SerialEnv(self.config.n_envs_per_worker(self.on_policy), env_func),
-    #             transform.clone(),
-    #         )
-    #     else:
-    #         self.env_func = lambda: TransformedEnv(env_func(), transform.clone())
-
-    #     self.test_env = test_env.to(self.config.sampling_device)
-
-    # def _setup_collector(self):
-    #     self.policy = self.algorithm.get_policy_for_collection()
-
-    #     self.group_policies = {}
-    #     eval_groups = ["listener"]
-    #     for group in self.group_map.keys():
-    #         print(f"DEBUG group={group}")
-    #         group_policy = self.policy.select_subsequence(out_keys=[(group, "action")])
-    #         assert len(group_policy) == 1
-
-    #         if group in eval_groups:
-    #             print(f"DEBUG eval mode for={group}")
-    #             group_policy.eval()
-
-    #         self.group_policies.update({group: group_policy[0]})
-
-    #     self.collector = SyncDataCollector(
-    #         self.env_func,
-    #         self.policy,
-    #         device=self.config.sampling_device,
-    #         storing_device=self.config.train_device,
-    #         frames_per_batch=self.config.collected_frames_per_batch(self.on_policy),
-    #         total_frames=self.config.get_max_n_frames(self.on_policy),
-    #         init_random_frames=self.config.off_policy_init_random_frames
-    #         if not self.on_policy
-    #         else 0,
-    #     )
