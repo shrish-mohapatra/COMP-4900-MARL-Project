@@ -27,7 +27,7 @@ class Scenario(BaseScenario):
             self.malicious_speaker = kwargs['malicious_speaker']
         world = World(batch_dim=batch_dim, device=device, dim_c=6)
 
-        self.MIN_DISTANCE = 0.01
+        self.MIN_DISTANCE = 0.15
 
         # Add agents ---
 
@@ -179,14 +179,14 @@ class Scenario(BaseScenario):
             dim=1
         )
         updates = cur_distance <= self.MIN_DISTANCE
-        self.rew[updates] += self.goal_rew
+        self.rew[updates] += self.goal_rew[updates]
         return self.rew
 
     def done(self):
         cur_distance = torch.linalg.vector_norm(
             (self.agent_map["listener_0"].state.pos -
              self.world.target.state.pos),
-            dim=1, device=self.world.device
+            dim=1
         )
         result = cur_distance <= self.MIN_DISTANCE
         # if result.any():

@@ -167,7 +167,7 @@ class Benchmark:
             "config": self.experiment_config,
         }
 
-    def display_experiment(self, experiment: Experiment, experiment_index: int):
+    def display_experiment(self, experiment: Experiment, experiment_index: int = 100):
         print(
             json.dumps({
                 "msg": f"Running experiment {experiment_index+1}/{self.n_experiments}",
@@ -226,6 +226,9 @@ class Benchmark:
             print("\n\nBenchmark was closed gracefully\n\n")
             experiment.close()
             raise interrupt
+        except Exception as e:
+            print(f'The following experiment failed: {e}')
+            self.display_experiment(experiment)
 
     def run_sequential(self):
         """Run all the experiments in the benchmark in a sequence."""

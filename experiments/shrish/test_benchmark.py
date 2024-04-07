@@ -60,7 +60,7 @@ experiment_config.render = True
 experiment_config.evaluation_interval = 100_000
 experiment_config.evaluation_episodes = 10
 
-experiment_config.max_n_iters = 1_000 # epoch
+experiment_config.max_n_iters = 2 # epoch
 experiment_config.max_n_frames = 8_000_000
 experiment_config.loggers = ["csv"]
 experiment_config.create_json = True
