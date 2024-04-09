@@ -23,6 +23,7 @@ import traceback
 from benchmarl.algorithms import MappoConfig
 from benchmarl.models.mlp import MlpConfig
 
+
 class Benchmark:
     """A benchmark.
 
@@ -82,7 +83,7 @@ class Benchmark:
                             'critic_model_config': self.critic_model_config,
                             'config': self.experiment_config,
                         }
-        
+
         # Curriculum learning for baseline only
         # ex. freeze_timeline = {
         #     100: ["civilian", "policeHQ"],
@@ -125,6 +126,30 @@ class Benchmark:
                             critic_model_config=self.critic_model_config,
                             config=self.experiment_config,
                         )
+
+    def save_experiments_config(self):
+        """Save JSON file with experiments configs"""
+        configs = []
+        for model_config in self.model_configs:
+            for algorithm_config in self.algorithm_configs:
+                for task in self.tasks:
+                    for seed in self.seeds:
+                        configs.append({
+                            "model_config": str(type(model_config).__name__),
+                            "algorithm_config": str(type(algorithm_config).__name__),
+                            "task": str(type(task).__name__),
+                            "seed": seed,
+                        })
+        
+        configs.append({
+            "model_config": str(type(self.model_configs[0]).__name__),
+            "algorithm_config": "MappoCurriculum",
+            "task": str(type(self.tasks[0]).__name__),
+            "seed": list(self.seeds)[0],
+        })
+
+        with open("experiment.config", "w") as config_file:
+            json.dump(configs, config_file, indent=2)
 
     def get_experiments_kwargs(self) -> Iterator[dict]:
         for model_config in self.model_configs:

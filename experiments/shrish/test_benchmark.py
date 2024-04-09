@@ -60,7 +60,7 @@ experiment_config.render = True
 experiment_config.evaluation_interval = 100_000
 experiment_config.evaluation_episodes = 10
 
-experiment_config.max_n_iters = 2 # epoch
+experiment_config.max_n_iters = 1000 # epoch
 experiment_config.max_n_frames = 8_000_000
 experiment_config.loggers = ["csv"]
 experiment_config.create_json = True
@@ -99,7 +99,9 @@ if __name__ == "__main__":
         seeds=seeds,
         experiment_config=experiment_config,
         num_process=3,
+        run_curriculum=True,
     )
+    benchmark.save_experiments_config()
 
     # benchmark.run_sequential()
-    benchmark.run_parallel()
+    # benchmark.run_parallel()
