@@ -54,13 +54,13 @@ model_configs = [MlpConfig.get_from_yaml(), LSTMMlpConfig.get_from_yaml(model_co
 # THIS IS VERY IMPORTANT !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 experiment_config.on_policy_collected_frames_per_batch = 1_000
 experiment_config.off_policy_collected_frames_per_batch = 1_000
-experiment_config.evaluation = True
-experiment_config.render = True
+experiment_config.evaluation = False
+experiment_config.render = False
 # experiment_config.evaluation_interval = 12_000
-experiment_config.evaluation_interval = 150_000
+experiment_config.evaluation_interval = 100_000
 experiment_config.evaluation_episodes = 10
 
-experiment_config.max_n_iters = 1500 # epoch
+experiment_config.max_n_iters = 1000 # epoch
 experiment_config.max_n_frames = 8_000_000
 experiment_config.loggers = ["csv"]
 experiment_config.create_json = True
@@ -98,8 +98,10 @@ if __name__ == "__main__":
         tasks=tasks,
         seeds=seeds,
         experiment_config=experiment_config,
-        num_process=4,
+        num_process=3,
+        run_curriculum=True,
     )
+    benchmark.save_experiments_config()
 
     # benchmark.run_sequential()
     benchmark.run_parallel()
