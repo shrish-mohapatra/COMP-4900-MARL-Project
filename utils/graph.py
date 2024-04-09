@@ -51,6 +51,7 @@ import matplotlib.pyplot as plt
 import os
 import pandas as pd
 import torch
+import numpy as np
 
 from dataclasses import dataclass
 from typing import List
@@ -88,6 +89,7 @@ class SelectCriteria:
     def get_label(self) -> str:
         criteria_vals = iter(self.criteria.values())
         val1 = next(criteria_vals)
+        # return val1
         val2 = next(criteria_vals)
         return f"{val1} x {val2}"
 
@@ -172,45 +174,18 @@ class GraphFactory:
         x_label="Iteration",
         y_label="Mean Return",
     ):
-        """
-        plt.clf()
-
-        for each criteria
-            dataframes = []
-            for each datasource
-                for each key,val in criteria
-                    if datasource.config[key] == value:
-                        dataframes.append(datasource.df)
-
-            calc aggregated df
-                calc avg x across same y vals
-
-            scatter aggregated df
-            plot line aggregated df
-        
-        dfs = [
-            [x: [1, 2, 3], y: [1, 2, 3]],
-            [x: [1, 2, 3, 4], y: [3, 4, 5, 6]],
-        ]
-
-        avg_dfs = [
-            [x: [1, 2, 3, 4], y: [2, 3, 4, 6]],
-        ]
-        """
-        # plt.clf()
-        # _, ax = plt.subplots()
-
         # Prepare dataframes
         for criteria in criterias:
             dfs: List[pd.DataFrame] = []
             for data_source in self.data_sources:
                 if criteria.check(data_source):
-                    dfs.append(data_source.content)
+                    df = data_source.content
+                    dfs.append(df)
 
             df_concat = pd.concat(dfs)
             df_avg = df_concat.groupby('x', as_index=False).mean()
             
-            plt.scatter(df_avg["x"], df_avg["y"], label=str(criteria.get_label()))
+            # plt.scatter(df_avg["x"], df_avg["y"], label=str(criteria.get_label()))
             plt.plot(df_avg["x"], df_avg["y"], label=str(criteria.get_label()))
         
         plt.xlabel(x_label)
@@ -237,82 +212,51 @@ def test_checkpoint():
 if __name__ == "__main__":
     gf = GraphFactory(
         experiment_config_file="experiment.config",
-        source_csv_file="eval_listener_reward_episode_reward_mean.csv",
-        # source_csv_file="collection_listener_reward_episode_reward_mean.csv",
+        # source_csv_file="eval_listener_reward_episode_reward_mean.csv",
+        source_csv_file="collection_listener_reward_episode_reward_mean.csv",
         exclude_folders=["_saved"],
-        save_graphs=False,
+        save_graphs=True,
     )
     gf.load()
-    
-    """
-    3 algos (mappo, mappodecoder, curriculum)
-    2 models (mlp, lstmmlp)
-    graph per Task
-    - baseline
-        - algo: mappo model: mlp
-        - algo: mappodecoder model: mlp
-        - algo: mappo model: lstmmlp
-        - algo: mappodecoder model: lstmmlp
-        - algo: curriculum
-    
-    -e 
-    """
+    tasks = [
+        "BaselineVmasTask",
+        "Ext1VmasTask",
+        "Ext2VmasTask",
+        "Ext3VmasTask",
+        "Ext4VmasTask",
+    ]
 
-    gf.graph(
-        "Baseline Task",
-        criterias=[
+    for task in tasks:
+        criterias = [
             SelectCriteria(
                 algorithm_config="MappoConfig",
                 model_config="MlpConfig",
-                task="BaselineVmasTask",
+                task=task,
             ),
             SelectCriteria(
                 algorithm_config="MappoConfig",
                 model_config="LSTMMlpConfig",
-                task="BaselineVmasTask",
+                task=task,
             ),
             SelectCriteria(
                 algorithm_config="MappoDecoderConfig",
                 model_config="MlpConfig",
-                task="BaselineVmasTask",
+                task=task,
             ),
             SelectCriteria(
                 algorithm_config="MappoDecoderConfig",
                 model_config="LSTMMlpConfig",
-                task="BaselineVmasTask",
+                task=task,
             ),
             SelectCriteria(
                 algorithm_config="MappoCurriculum",
                 model_config="MlpConfig",
-                task="BaselineVmasTask",
+                task=task,
             ),
         ]
-    )
-
-    # gf.graph(
-    #     "Task Peformance Comparison",
-    #     criterias=[
-    #         SelectCriteria(task="BaselineVmasTask"),
-    #         SelectCriteria(task="Ext1VmasTask"),
-    #         SelectCriteria(task="Ext2VmasTask"),
-    #         SelectCriteria(task="Ext3VmasTask"),
-    #         SelectCriteria(task="Ext4VmasTask"),
-    #     ],
-    # )
-    # gf.graph(
-    #     "Mlp vs LSTMMlp",
-    #     criterias=[
-    #         SelectCriteria(model_config="MlpConfig"),
-    #         SelectCriteria(model_config="LSTMMlpConfig"),
-    #     ],
-    # )
-    # gf.graph(
-    #     "Curriculum vs Baseline",
-    #     criterias=[
-    #         SelectCriteria(algorithm_config="MappoCurriculum", task="BaselineVmasTask"),
-    #         SelectCriteria(algorithm_config="MappoConfig", task="BaselineVmasTask"),
-    #     ],
-    # )
-
-    # test_checkpoint()
-    pass
+        if task != "BaselineVmasTask":
+            criterias = criterias[:-1]
+        gf.graph(
+            task,
+            criterias,
+        )
