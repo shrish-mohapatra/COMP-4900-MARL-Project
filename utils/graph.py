@@ -98,6 +98,8 @@ class GraphFactory:
         source_csv_file: str,
         source_folder: str = "results",
         exclude_folders: List[str] = [],
+        save_graphs = False,
+        save_folder = "graphs",
     ):
         """
         Args
@@ -105,11 +107,15 @@ class GraphFactory:
         - source_csv_file: File to extract data from (ex. eval_civilian_reward_episode_reward_mean.csv)
         - soruce_filder: Folder where experiment results are saved
         - exclude_folders: List of folders to exclude from extraction
+        - save_graphs: If yes will save PNGs to `save_graphs` folder
+        - save_folder: Folder to save graphs to
         """
         self.experiment_config_file = experiment_config_file
         self.source_csv_file = source_csv_file
         self.source_folder = source_folder
         self.exclude_folders = exclude_folders
+        self.save_graphs = save_graphs
+        self.save_folder = save_folder
 
         self.data_sources: List[DataSource] = []
         self.experiment_configs: List[dict] = []
@@ -208,7 +214,14 @@ class GraphFactory:
         plt.ylabel(y_label)
         plt.title(title)
         plt.legend()
-        plt.show()
+        
+        if self.save_graphs:
+            graph_file_path = f"{self.save_folder}/{title}.png"
+            plt.savefig(graph_file_path)
+            print("Saved graph to", graph_file_path)
+        else:
+            plt.show()
+        
         plt.clf()
 
 
@@ -221,11 +234,22 @@ def test_checkpoint():
 if __name__ == "__main__":
     gf = GraphFactory(
         experiment_config_file="experiment.config",
-        # source_csv_file="eval_listener_reward_episode_reward_mean.csv",
-        source_csv_file="collection_listener_reward_episode_reward_mean.csv",
+        source_csv_file="eval_listener_reward_episode_reward_mean.csv",
+        # source_csv_file="collection_listener_reward_episode_reward_mean.csv",
         exclude_folders=["_saved"],
+        save_graphs=True,
     )
     gf.load()
+    gf.graph(
+        "Task Peformance Comparison",
+        criterias=[
+            SelectCriteria(task="BaselineVmasTask"),
+            SelectCriteria(task="Ext1VmasTask"),
+            SelectCriteria(task="Ext2VmasTask"),
+            SelectCriteria(task="Ext3VmasTask"),
+            SelectCriteria(task="Ext4VmasTask"),
+        ],
+    )
     gf.graph(
         "Mlp vs LSTMMlp",
         criterias=[
