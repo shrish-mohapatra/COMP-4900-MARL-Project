@@ -86,7 +86,10 @@ class SelectCriteria:
         return True
 
     def get_label(self) -> str:
-        return next(iter(self.criteria.values()))
+        criteria_vals = iter(self.criteria.values())
+        val1 = next(criteria_vals)
+        val2 = next(criteria_vals)
+        return f"{val1} x {val2}"
 
 
 class GraphFactory:
@@ -237,33 +240,79 @@ if __name__ == "__main__":
         source_csv_file="eval_listener_reward_episode_reward_mean.csv",
         # source_csv_file="collection_listener_reward_episode_reward_mean.csv",
         exclude_folders=["_saved"],
-        save_graphs=True,
+        save_graphs=False,
     )
     gf.load()
+    
+    """
+    3 algos (mappo, mappodecoder, curriculum)
+    2 models (mlp, lstmmlp)
+    graph per Task
+    - baseline
+        - algo: mappo model: mlp
+        - algo: mappodecoder model: mlp
+        - algo: mappo model: lstmmlp
+        - algo: mappodecoder model: lstmmlp
+        - algo: curriculum
+    
+    -e 
+    """
+
     gf.graph(
-        "Task Peformance Comparison",
+        "Baseline Task",
         criterias=[
-            SelectCriteria(task="BaselineVmasTask"),
-            SelectCriteria(task="Ext1VmasTask"),
-            SelectCriteria(task="Ext2VmasTask"),
-            SelectCriteria(task="Ext3VmasTask"),
-            SelectCriteria(task="Ext4VmasTask"),
-        ],
+            SelectCriteria(
+                algorithm_config="MappoConfig",
+                model_config="MlpConfig",
+                task="BaselineVmasTask",
+            ),
+            SelectCriteria(
+                algorithm_config="MappoConfig",
+                model_config="LSTMMlpConfig",
+                task="BaselineVmasTask",
+            ),
+            SelectCriteria(
+                algorithm_config="MappoDecoderConfig",
+                model_config="MlpConfig",
+                task="BaselineVmasTask",
+            ),
+            SelectCriteria(
+                algorithm_config="MappoDecoderConfig",
+                model_config="LSTMMlpConfig",
+                task="BaselineVmasTask",
+            ),
+            SelectCriteria(
+                algorithm_config="MappoCurriculum",
+                model_config="MlpConfig",
+                task="BaselineVmasTask",
+            ),
+        ]
     )
-    gf.graph(
-        "Mlp vs LSTMMlp",
-        criterias=[
-            SelectCriteria(model_config="MlpConfig"),
-            SelectCriteria(model_config="LSTMMlpConfig"),
-        ],
-    )
-    gf.graph(
-        "Curriculum vs Baseline",
-        criterias=[
-            SelectCriteria(algorithm_config="MappoCurriculum", task="BaselineVmasTask"),
-            SelectCriteria(algorithm_config="MappoConfig", task="BaselineVmasTask"),
-        ],
-    )
+
+    # gf.graph(
+    #     "Task Peformance Comparison",
+    #     criterias=[
+    #         SelectCriteria(task="BaselineVmasTask"),
+    #         SelectCriteria(task="Ext1VmasTask"),
+    #         SelectCriteria(task="Ext2VmasTask"),
+    #         SelectCriteria(task="Ext3VmasTask"),
+    #         SelectCriteria(task="Ext4VmasTask"),
+    #     ],
+    # )
+    # gf.graph(
+    #     "Mlp vs LSTMMlp",
+    #     criterias=[
+    #         SelectCriteria(model_config="MlpConfig"),
+    #         SelectCriteria(model_config="LSTMMlpConfig"),
+    #     ],
+    # )
+    # gf.graph(
+    #     "Curriculum vs Baseline",
+    #     criterias=[
+    #         SelectCriteria(algorithm_config="MappoCurriculum", task="BaselineVmasTask"),
+    #         SelectCriteria(algorithm_config="MappoConfig", task="BaselineVmasTask"),
+    #     ],
+    # )
 
     # test_checkpoint()
     pass
