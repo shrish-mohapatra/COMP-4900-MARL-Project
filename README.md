@@ -1,5 +1,5 @@
-# COMP 4900G Project
-> Multi agent reinforcement learning project
+# PoPoRL
+> Multi agent reinforcement learning for emergency response systems
 
 
 ## Development
