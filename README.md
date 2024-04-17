@@ -1,6 +1,7 @@
 # PoPoRL
 > Multi agent reinforcement learning for emergency response systems
 
+![image](https://github.com/shrish-mohapatra/PoPoRL/assets/51547897/14c44529-0163-40fd-9aaf-eb48d2021b4f)
 
 ## Development
 ```
